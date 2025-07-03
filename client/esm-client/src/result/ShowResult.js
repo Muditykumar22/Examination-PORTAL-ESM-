@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from 'react';
 import { Row, Col, Divider, Progress } from "antd";
 import { connect } from "react-redux";
 import "./ShowResult.css";
 import Chart from "react-google-charts";
+import axios from 'axios';
 
 function ShowResult(props) {
   const { testName, date } = props.selectedTest;
@@ -25,6 +26,27 @@ function ShowResult(props) {
     totalAttempt = rightAnswers - -wrongAnswers;
   }
   const submitDate = new Date(date);
+  const [evaluation, setEvaluation] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Replace these with actual question/answer extraction logic as needed
+  const question = props.question || '';
+  const answer = props.answer || '';
+
+  const handleEvaluate = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await axios.post('/api/evaluate', { question, answer });
+      setEvaluation(res.data.evaluation);
+    } catch (err) {
+      setError('Evaluation failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       <div className="container dashboard">
@@ -122,6 +144,16 @@ function ShowResult(props) {
           </Col>
         </Row>
       </div>
+      <button onClick={handleEvaluate} disabled={loading} style={{ margin: '10px 0' }}>
+        {loading ? 'Evaluating...' : 'Evaluate with GenAI'}
+      </button>
+      {error && <div style={{ color: 'red' }}>{error}</div>}
+      {evaluation && (
+        <div style={{ marginTop: '10px', background: '#f0f0f0', padding: '10px', borderRadius: '5px' }}>
+          <h3>GenAI Evaluation:</h3>
+          <p>{evaluation}</p>
+        </div>
+      )}
     </>
   );
 }

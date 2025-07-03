@@ -7,6 +7,7 @@ const InitiateMongoServer = require("./config/db");
 const cookieParser = require("cookie-parser");
 const cors = require('cors');
 var path = require("path");
+const evaluateRoute = require('./routes/evaluate');
 require('dotenv').config()
 
 // Initiate Mongo Server
@@ -33,6 +34,7 @@ app.use(cors());
 app.use("/user", user);
 app.use("/teacher", teacher);
 app.use("/student", student);
+app.use('/api/evaluate', evaluateRoute);
 
 
 if (process.env.NODE_ENV === "production") {
